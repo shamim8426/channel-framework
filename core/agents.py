@@ -14,12 +14,13 @@ IF = re.compile(r"\{\{#if\s+([a-z_][a-z0-9_.]*)\s*(==|!=)\s*([A-Za-z0-9_-]+)\s*\
 ROLES = ("khoji", "kalam", "munshi", "sampadak", "nigraan", "kaarigar")
 
 
-def context_for(cfg: ChannelConfig) -> dict:
+def context_for(cfg: ChannelConfig, ws: Workspace | None = None) -> dict:
+    ws = ws or Workspace()
     s = cfg.slug
     return {
         "channel": {"name": cfg.name, "slug": s, "language": cfg["language"], "niche": cfg["niche"], "content_type": cfg["content_type"],
                     "pipeline": cfg["pipeline"], "handle": cfg.get("handle", "")},
-        "rules": {"global": "RULES.md", "channel": f"channels/{s}/rules.md", "style": f"channels/{s}/STYLE_LEARNINGS.md",
+        "rules": {"global": ws.global_rules_ref, "channel": f"channels/{s}/rules.md", "style": f"channels/{s}/STYLE_LEARNINGS.md",
                   "dir": f"channels/{s}"},
         "narrators": {"list": ", ".join(f"{n['id']} ({n['role']})" for n in cfg["narrators"])},
         "safety": {"depictions": "; ".join(cfg["safety"]["forbidden_depictions"]) or "(none configured)",
@@ -46,7 +47,7 @@ def render_agents(cfg: ChannelConfig, ws: Workspace | None = None, out_dir: Path
     ws = ws or Workspace()
     out_dir = out_dir or ws.agents_out
     out_dir.mkdir(parents=True, exist_ok=True)
-    ctx, written = context_for(cfg), []
+    ctx, written = context_for(cfg, ws), []
     for role in ROLES:
         tmpl = ws.agent_templates / f"{role}.md.tmpl"
         f = out_dir / f"{role}-{cfg.slug}.md"

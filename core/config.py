@@ -157,7 +157,7 @@ def load_channel(slug: str, ws: Workspace | None = None) -> ChannelConfig:
     check_slug(slug)
     d = ws.channel_dir(slug)
     if not d.is_dir():
-        raise ConfigError(f"channel '{slug}' does not exist ({d}). Create it: python -m core new-channel {slug}")
+        raise ConfigError(f"channel '{slug}' does not exist ({d}). Create it: " + ws.cmd(f"new-channel {slug}"))
     path = find_config_file(d)
     return validate_data(read_raw(path), slug, path)
 
