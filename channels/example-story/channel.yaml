@@ -1,0 +1,49 @@
+# Fully fictional demo channel: nothing here refers to a real channel, person, voice or account.
+slug: example-story
+name: Little Lantern Tales
+handle: "@example-handle"
+youtube_channel_id: REPLACE_ME
+language: en
+niche: gentle two-minute bedtime adventures for children
+content_type: fiction
+pipeline: character_story
+
+formats:
+  long:   {min_seconds: 30, max_seconds: 300, script_words: [120, 400], max_images: 6}
+  shorts: {enabled: true, max_seconds: 20, count: 1}
+
+narrators:
+  - {id: narrator, role: narrator, voice_id: demo-voice-narrator, style: "warm, slow bedtime storyteller"}
+
+characters:
+  - {id: pip,  name: Pip,  description: "a small round firefly with a tiny golden lantern and big curious eyes", voice_id: demo-voice-pip, role: hero}
+  - {id: mira, name: Mira, description: "an old wise owl in a knitted green scarf, round spectacles", voice_id: demo-voice-mira, role: guide}
+
+visual_style:
+  prompt: soft watercolour picture-book illustration, warm lantern light, deep blue night, gentle rounded shapes
+  negative_prompt: text, watermark, logo, scary imagery
+  aspect: "16:9"
+
+music: {library_dir: music, tracks: []}
+audio: {target_lufs: -14.0, true_peak: -1.5, tempo: 1.0}
+
+providers:
+  llm:   {name: mock}
+  image: {name: mock}
+  tts:   {name: mock}
+  music: {name: mock}
+
+safety:
+  forbidden_depictions: ["frightening monsters", "violence"]
+  forbidden_terms: ["gore"]
+
+youtube:
+  category_id: "1"
+  made_for_kids: true
+  privacy: private
+  title_suffix: "| Little Lantern Tales"
+  default_tags: [bedtime, kids, story]
+  schedule: {timezone: UTC, long_time: "18:00", immediate_after: "18:00", short_after_long_min: 60, one_long_per_day: true}
+
+strings: {ai_disclosure: "Pictures and voices are made with AI."}
+credentials_ref: example-story

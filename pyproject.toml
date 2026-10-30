@@ -1,0 +1,13 @@
+[project]
+name = "channel-framework"
+version = "0.1.0"
+description = "Reusable multi-channel YouTube production framework (script -> upload), config-driven."
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0", "jsonschema>=4.0", "Pillow>=10.0", "numpy>=1.26", "requests>=2.31"]
+
+[project.optional-dependencies]
+youtube = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2", "google-auth-httplib2>=0.2"]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

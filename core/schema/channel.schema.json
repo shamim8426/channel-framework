@@ -1,0 +1,144 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "channel config (channel.yaml / channel.json)",
+  "type": "object",
+  "required": ["slug", "name", "language", "niche", "content_type", "pipeline", "formats", "narrators", "visual_style", "youtube", "credentials_ref"],
+  "additionalProperties": false,
+  "patternProperties": {"^x_": {}},
+  "properties": {
+    "slug": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,40}$"},
+    "name": {"type": "string", "minLength": 1},
+    "handle": {"type": "string", "description": "YouTube @handle (informational)"},
+    "youtube_channel_id": {"type": "string", "pattern": "^(UC[A-Za-z0-9_-]{22}|REPLACE_ME)$", "description": "REPLACE_ME until the channel exists; uploads refuse a placeholder"},
+    "language": {"type": "string", "minLength": 2, "description": "BCP-47-ish, e.g. en, hi"},
+    "niche": {"type": "string", "minLength": 3},
+    "content_type": {"enum": ["fiction", "real_sourced"]},
+    "pipeline": {"type": "string", "minLength": 3, "description": "plugin name (character_story, surah_explainer) or 'package.module:Class'"},
+    "formats": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "long": {"$ref": "#/definitions/format"},
+        "shorts": {"$ref": "#/definitions/format"}
+      },
+      "required": ["long"]
+    },
+    "narrators": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "required": ["id", "role", "voice_id"], "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "role": {"type": "string", "minLength": 1},
+          "voice_id": {"type": "string", "minLength": 1},
+          "style": {"type": "string"},
+          "language": {"type": "string"}
+        }
+      }
+    },
+    "visual_style": {
+      "type": "object", "required": ["prompt"], "additionalProperties": false,
+      "properties": {
+        "prompt": {"type": "string", "minLength": 10},
+        "negative_prompt": {"type": "string"},
+        "aspect": {"enum": ["16:9", "9:16", "1:1"]},
+        "palette": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "name", "description"], "additionalProperties": false,
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "name": {"type": "string"},
+          "description": {"type": "string", "minLength": 5, "description": "fixed visual description reused in every image prompt"},
+          "voice_id": {"type": "string"},
+          "role": {"type": "string"}
+        }
+      }
+    },
+    "music": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "library_dir": {"type": "string"},
+        "tracks": {"type": "array", "items": {"type": "object", "required": ["file"], "additionalProperties": false,
+          "properties": {"file": {"type": "string"}, "mood": {"type": "string"}, "credit": {"type": "string"}}}}
+      }
+    },
+    "audio": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "target_lufs": {"type": "number"}, "true_peak": {"type": "number"},
+        "tempo": {"type": "number", "minimum": 0.5, "maximum": 2.0},
+        "music_below_voice_db": {"type": "number"}
+      }
+    },
+    "providers": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "llm": {"$ref": "#/definitions/provider"}, "image": {"$ref": "#/definitions/provider"},
+        "tts": {"$ref": "#/definitions/provider"}, "music": {"$ref": "#/definitions/provider"}
+      }
+    },
+    "research": {"type": "object", "additionalProperties": false, "properties": {"min_sources_per_fact": {"type": "integer", "minimum": 1}}},
+    "safety": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "forbidden_depictions": {"type": "array", "items": {"type": "string"}},
+        "forbidden_terms": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "budget": {"type": "object", "additionalProperties": false, "properties": {
+      "currency": {"type": "string"}, "target_per_project": {"type": "number"}, "hard_cap_per_project": {"type": "number"}}},
+    "youtube": {
+      "type": "object", "additionalProperties": false, "required": ["category_id", "made_for_kids"],
+      "properties": {
+        "category_id": {"type": "string", "pattern": "^[0-9]{1,3}$"},
+        "made_for_kids": {"type": "boolean"},
+        "contains_synthetic_media": {"type": "boolean"},
+        "privacy": {"enum": ["private", "unlisted", "public"]},
+        "auto_publish": {"type": "boolean", "description": "true: set publishAt/public ourselves; false: upload private + print a STUDIO ACTION"},
+        "playlists": {"type": "object", "additionalProperties": {"type": "string"}},
+        "title_suffix": {"type": "string"},
+        "default_tags": {"type": "array", "items": {"type": "string"}},
+        "schedule": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "timezone": {"type": "string"},
+            "long_time": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"},
+            "immediate_after": {"type": "string", "pattern": "^[0-2][0-9]:[0-5][0-9]$"},
+            "short_after_long_min": {"type": "integer", "minimum": 0},
+            "one_long_per_day": {"type": "boolean"}
+          }
+        }
+      }
+    },
+    "analytics": {"type": "object", "additionalProperties": false, "properties": {
+      "provider": {"type": "string"}, "reports": {"type": "array", "items": {"enum": ["48h", "7d", "weekly"]}}}},
+    "options": {"type": "object", "description": "free-form options read by the pipeline plugin (documented per plugin)"},
+    "strings": {"type": "object", "additionalProperties": {"type": "string"}, "description": "on-screen / language specific strings (labels, taglines)"},
+    "credentials_ref": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,40}$", "description": "NAME of the secrets folder secrets/<ref>/ - never a secret value"}
+  },
+  "definitions": {
+    "format": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "min_seconds": {"type": "integer", "minimum": 5},
+        "max_seconds": {"type": "integer", "minimum": 5},
+        "script_words": {"type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2},
+        "max_images": {"type": "integer", "minimum": 1},
+        "count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "provider": {
+      "type": "object", "required": ["name"], "additionalProperties": false,
+      "properties": {
+        "name": {"type": "string"}, "model": {"type": "string"},
+        "api_key_env": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "description": "NAME of the environment variable holding the key"},
+        "free_first": {"type": "boolean"}
+      }
+    }
+  }
+}

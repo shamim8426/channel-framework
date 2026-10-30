@@ -1,0 +1,53 @@
+# Reference config with every key explained. `python -m core new-channel` writes a smaller one for you.
+# Validate any time: python -m core validate --channel <slug>
+slug: your-channel               # == folder name; lowercase letters, digits, '-'
+name: Your Channel Name
+handle: "@your-handle"           # informational
+youtube_channel_id: REPLACE_ME   # UC... (24 chars). Uploads abort if the logged-in channel differs. REPLACE_ME blocks live uploads.
+language: en                     # script + TTS language
+niche: short bedtime stories     # free text, shown to the agents
+content_type: fiction            # fiction | real_sourced  (real_sourced = research + source-check gates are mandatory)
+pipeline: character_story        # character_story | surah_explainer | package.module:Class
+
+formats:
+  long:   {min_seconds: 120, max_seconds: 480, script_words: [250, 900], max_images: 12}
+  shorts: {enabled: true, max_seconds: 40, count: 1}
+
+narrators:                       # voice_id belongs to YOUR TTS provider
+  - {id: narrator, role: narrator, voice_id: voice-1, style: "clear, warm storyteller"}
+
+characters: []                   # [{id, name, description (fixed look, reused in every image prompt), voice_id}]
+
+visual_style:
+  prompt: soft hand-painted illustration, warm light, gentle colours
+  negative_prompt: text, watermark, logo
+  aspect: "16:9"
+
+music: {library_dir: music, tracks: []}      # tracks: [{file, mood, credit}] (files stay out of git)
+audio: {target_lufs: -14.0, true_peak: -1.5, tempo: 1.0, music_below_voice_db: 19.0}
+
+providers:                       # mock = offline/free (default). Real ones only run with --live.
+  llm:   {name: mock}            # e.g. {name: gemini, model: <model>, api_key_env: GEMINI_API_KEY}
+  image: {name: mock}            # free-first chain: {name: "cloudflare,gemini", api_key_env: ...}
+  tts:   {name: mock}
+  music: {name: mock}
+
+research: {min_sources_per_fact: 2}
+safety: {forbidden_depictions: [], forbidden_terms: []}
+budget: {currency: INR, target_per_project: 100, hard_cap_per_project: 120}
+
+youtube:
+  category_id: "22"
+  made_for_kids: false
+  contains_synthetic_media: true
+  privacy: private               # uploads start private; you publish after watching
+  auto_publish: false            # false: print a STUDIO ACTION with the planned slot; true: set publishAt/public ourselves
+  title_suffix: "| Your Channel Name"
+  default_tags: []
+  playlists: {}                  # {name: playlist_id}
+  schedule: {timezone: UTC, long_time: "19:00", immediate_after: "19:00", short_after_long_min: 60, one_long_per_day: true}
+
+analytics: {provider: mock, reports: ["48h", "7d"]}
+strings: {ai_disclosure: "Images and voices are AI-generated."}   # language-specific on-screen/description strings
+options: {}                      # plugin options (see docs/PIPELINES.md)
+credentials_ref: your-channel    # NAME of secrets/<ref>/ (gitignored). Never put a key or token here.

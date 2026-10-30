@@ -1,0 +1,40 @@
+# secrets: never in git (per-channel tokens live in secrets/<slug>/)
+secrets/
+*.token.json
+token.json
+client_secret*.json
+.env
+.env.*
+
+# generated media and work files (the repo holds code + config, not assets)
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.png
+*.jpg
+*.jpeg
+!docs/**/*.png
+cache/
+**/projects/*/output/
+**/projects/*/audio/
+**/projects/*/images/
+**/projects/*/build/
+study/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# rendered agent files are generated per workspace (python -m core render-agents)
+# .claude/agents/ is committed only if you want it shared; default: ignored
+.claude/agents/
+
+# output of the demo channel's dry runs
+channels/example-story/projects/*/
+!channels/example-story/projects/README.md
+channels/example-story/analytics/
+channels/example-story/cost_log.csv
