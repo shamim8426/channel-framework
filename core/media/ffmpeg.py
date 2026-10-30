@@ -73,8 +73,9 @@ def normalize(src: Path, out: Path, lufs: float, true_peak: float):
     _run(["-i", src, "-af", f"loudnorm=I={lufs}:TP={true_peak}:LRA=11", "-ar", 48000, out])
 
 
-def slideshow(images, durations, audio: Path | None, out: Path, size=(1280, 720)):
-    """Still images + audio -> mp4 (preview/build). Real pipelines can swap in richer motion; this is the portable baseline."""
+def slideshow(images, durations, audio: Path | None, out: Path, size=(1280, 720), fit="pad"):
+    """Still images + audio -> mp4 (preview/build). Real pipelines can swap in richer motion; this is the portable baseline.
+    fit: "pad" letterboxes images of another shape, "crop" fills the frame and trims the edges."""
     if not have_ffmpeg():
         raise RuntimeError("ffmpeg/ffprobe not found: install ffmpeg (doctor shows the status)")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -87,7 +88,10 @@ def slideshow(images, durations, audio: Path | None, out: Path, size=(1280, 720)
     args = ["-f", "concat", "-safe", 0, "-i", lst]
     if audio:
         args += ["-i", audio]
-    args += ["-vf", f"scale={size[0]}:{size[1]}:force_original_aspect_ratio=decrease,pad={size[0]}:{size[1]}:(ow-iw)/2:(oh-ih)/2,fps=10,format=yuv420p",
+    w, h = size
+    frame = (f"scale={w}:{h}:force_original_aspect_ratio=increase,crop={w}:{h}" if fit == "crop" else
+             f"scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2")
+    args += ["-vf", f"{frame},fps=10,format=yuv420p",
              "-c:v", "libx264", "-preset", "ultrafast", "-tune", "stillimage", "-crf", 30]
     if audio:
         args += ["-c:a", "aac", "-b:a", "128k", "-shortest"]
@@ -99,5 +103,5 @@ def cut_vertical(src: Path, out: Path, start: float, seconds: float):
     """Centre-crop a 9:16 Short from a landscape video."""
     if not have_ffmpeg():
         raise RuntimeError("ffmpeg/ffprobe not found")
-    _run(["-ss", f"{start:.2f}", "-i", src, "-t", f"{seconds:.2f}", "-vf", "crop=ih*9/16:ih,scale=720:1280,format=yuv420p",
+    _run(["-ss", f"{start:.2f}", "-i", src, "-t", f"{seconds:.2f}", "-vf", "crop=min(iw\\,ih*9/16):ih,scale=720:1280,format=yuv420p",
           "-c:v", "libx264", "-preset", "ultrafast", "-crf", 28, "-c:a", "aac", out])

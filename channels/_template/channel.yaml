@@ -21,14 +21,15 @@ characters: []                   # [{id, name, description (fixed look, reused i
 visual_style:
   prompt: soft hand-painted illustration, warm light, gentle colours
   negative_prompt: text, watermark, logo
-  aspect: "16:9"
+  aspect: "16:9"                 # 16:9 (1280x720) | 9:16 (720x1280, vertical Shorts) | 1:1; sets image and video size
 
 music: {library_dir: music, tracks: []}      # tracks: [{file, mood, credit}] (files stay out of git)
 audio: {target_lufs: -14.0, true_peak: -1.5, tempo: 1.0, music_below_voice_db: 19.0}
 
 providers:                       # mock = offline/free (default). Real ones only run with --live.
   llm:   {name: mock}            # e.g. {name: gemini, model: <model>, api_key_env: GEMINI_API_KEY}
-  image: {name: mock}            # free-first chain: {name: "cloudflare,gemini", api_key_env: ...}
+  image: {name: mock}            # free-first chain: {name: "cloudflare,gemini", model: <gemini model>, api_key_env: GEMINI_API_KEY,
+                                 #   per_provider: {cloudflare: {api_key_env: CLOUDFLARE_API_TOKEN}}}
   tts:   {name: mock}
   music: {name: mock}
 
@@ -49,5 +50,5 @@ youtube:
 
 analytics: {provider: mock, reports: ["48h", "7d"]}
 strings: {ai_disclosure: "Images and voices are AI-generated."}   # language-specific on-screen/description strings
-options: {}                      # plugin options (see docs/PIPELINES.md)
+options: {}                      # plugin options (see docs/PIPELINES.md); image_fit: pad | crop (how images of another shape fill the frame)
 credentials_ref: your-channel    # NAME of secrets/<ref>/ (gitignored). Never put a key or token here.

@@ -1,7 +1,8 @@
 """Provider registry. providers.<kind>.name in channel config picks the implementation:
     mock                      offline, free (default, and forced whenever --live is not given)
     gemini | cloudflare       live vendors (--live + key env var)
-    "cloudflare,gemini"       FREE-FIRST chain: try in order, fall through on ProviderUnavailable (quota/overload)
+    "cloudflare,gemini"       FREE-FIRST chain: try in order, fall through on ProviderUnavailable (quota/overload);
+                              per-provider model / api_key_env go in `per_provider: {cloudflare: {...}, gemini: {...}}`
     "package.module:Class"    your own provider class (constructor receives the provider conf dict)
 """
 import importlib
@@ -59,7 +60,9 @@ def get_provider(kind: str, cfg: ChannelConfig, live: bool = False):
         cls = _live_class(kind, n)
         if cls is None:
             raise ValueError(f"providers.{kind}.name '{n}' is unknown (known: mock, gemini, cloudflare[image], package.module:Class)")
-        built.append(cls(conf) if n != "mock" else _MOCKS[kind]())
+        own = {k: v for k, v in conf.items() if k != "per_provider"}
+        own.update(conf.get("per_provider", {}).get(n, {}))
+        built.append(cls(own) if n != "mock" else _MOCKS[kind]())
     return built[0] if len(built) == 1 else Chain(kind, built)
 
 

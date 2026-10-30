@@ -137,7 +137,10 @@
       "properties": {
         "name": {"type": "string"}, "model": {"type": "string"},
         "api_key_env": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$", "description": "NAME of the environment variable holding the key"},
-        "free_first": {"type": "boolean"}
+        "free_first": {"type": "boolean"},
+        "per_provider": {"type": "object", "description": "overrides for one provider of a chain, e.g. {cloudflare: {api_key_env: ...}}",
+          "additionalProperties": {"type": "object", "additionalProperties": false, "properties": {
+            "model": {"type": "string"}, "api_key_env": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"}}}}
       }
     }
   }

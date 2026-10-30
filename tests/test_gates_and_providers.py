@@ -114,3 +114,17 @@ def test_text_pil_wraps_balanced_and_shapes():
     f = text_pil.load_font(None, 30)
     lines = text_pil.wrap_balanced("aaa bbb ccc ddd eee fff", f, 200)
     assert len(lines) <= 3 and all(lines)
+
+
+def test_chain_gives_each_provider_its_own_model_and_key(ws, channel):
+    import yaml
+    from core.config import load_channel
+    from core.providers import get_provider
+    f = ws.channel_dir(channel) / "channel.yaml"
+    d = yaml.safe_load(f.read_text())
+    d.setdefault("providers", {})["image"] = {"name": "cloudflare,gemini", "api_key_env": "GEMINI_API_KEY", "model": "img-model",
+                               "per_provider": {"cloudflare": {"api_key_env": "CF_TOKEN", "model": "@cf/x"}}}
+    f.write_text(yaml.safe_dump(d))
+    chain = get_provider("image", load_channel(channel, ws), live=True)  # builds objects only, no network call
+    cf, gm = chain.providers
+    assert (cf.model, cf.env) == ("@cf/x", "CF_TOKEN") and (gm.model, gm.env) == ("img-model", "GEMINI_API_KEY")
