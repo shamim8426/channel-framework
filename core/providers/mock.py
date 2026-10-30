@@ -94,12 +94,14 @@ class MockImage(ImageProvider):
 
 
 def write_wav(path: Path, seconds: float, freq=0.0, sr=24000):
+    import numpy as np
     path.parent.mkdir(parents=True, exist_ok=True)
     n = int(seconds * sr)
+    t = np.arange(n) / sr
+    pcm = (2000 * np.sin(2 * np.pi * freq * t)).astype("<i2") if freq else np.zeros(n, "<i2")
     with wave.open(str(path), "wb") as w:
         w.setnchannels(1), w.setsampwidth(2), w.setframerate(sr)
-        w.writeframes(b"".join(struct.pack("<h", int(2000 * math.sin(2 * math.pi * freq * i / sr)) if freq else 0)
-                               for i in range(n)))
+        w.writeframes(pcm.tobytes())
 
 
 class MockTTS(TTSProvider):

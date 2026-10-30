@@ -63,3 +63,11 @@ def test_rules_are_appended_after_global(ws, channel):
 
 def test_list_channels_skips_template(ws, channel):
     assert list_channels(ws) == [channel]
+
+
+def test_shipped_template_and_example_are_valid():
+    from core.config import read_raw
+    from core.paths import FRAMEWORK_ROOT
+    validate_data(read_raw(FRAMEWORK_ROOT / "channels" / "_template" / "channel.yaml"))
+    cfg = validate_data(read_raw(FRAMEWORK_ROOT / "channels" / "example-story" / "channel.yaml"), "example-story")
+    assert cfg.slug == "example-story" and cfg["pipeline"] == "character_story"

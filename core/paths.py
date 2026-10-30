@@ -4,7 +4,15 @@ import os
 import re
 from pathlib import Path
 
+from .errors import FrameworkError
+
 FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
+
+
+class SlugError(FrameworkError, ValueError):
+    pass
+
+
 SLUG_RE = re.compile(r"^[a-z0-9][a-z0-9-]{1,40}$")
 
 
@@ -66,5 +74,5 @@ class Workspace:
 
 def check_slug(slug: str) -> str:
     if not isinstance(slug, str) or not SLUG_RE.match(slug):
-        raise ValueError(f"invalid channel slug {slug!r}: use 2-41 chars, lowercase letters, digits and '-'")
+        raise SlugError(f"invalid channel slug {slug!r}: use 2-41 chars, lowercase letters, digits and '-'")
     return slug

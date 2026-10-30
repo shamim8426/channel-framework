@@ -87,8 +87,8 @@ def slideshow(images, durations, audio: Path | None, out: Path, size=(1280, 720)
     args = ["-f", "concat", "-safe", 0, "-i", lst]
     if audio:
         args += ["-i", audio]
-    args += ["-vf", f"scale={size[0]}:{size[1]}:force_original_aspect_ratio=decrease,pad={size[0]}:{size[1]}:(ow-iw)/2:(oh-ih)/2,fps=24,format=yuv420p",
-             "-c:v", "libx264", "-preset", "ultrafast", "-crf", 28]
+    args += ["-vf", f"scale={size[0]}:{size[1]}:force_original_aspect_ratio=decrease,pad={size[0]}:{size[1]}:(ow-iw)/2:(oh-ih)/2,fps=10,format=yuv420p",
+             "-c:v", "libx264", "-preset", "ultrafast", "-tune", "stillimage", "-crf", 30]
     if audio:
         args += ["-c:a", "aac", "-b:a", "128k", "-shortest"]
     _run(args + [out])
