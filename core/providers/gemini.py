@@ -46,7 +46,11 @@ class GeminiImage(ImageProvider):
         self.model, self.env = conf.get("model", ""), conf.get("api_key_env")
 
     def generate(self, prompt, out_path, size=(1280, 720)):
-        body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": {"responseModalities": ["IMAGE"]}}
+        ratio = {(1280, 720): "16:9", (720, 1280): "9:16", (1080, 1080): "1:1"}.get(tuple(size))
+        gen = {"responseModalities": ["IMAGE"]}
+        if ratio:
+            gen["imageConfig"] = {"aspectRatio": ratio}
+        body = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": gen}
         for p in _parts(_call(self.model, api_key(self.env), body)):
             if "inlineData" in p:
                 Path(out_path).parent.mkdir(parents=True, exist_ok=True)

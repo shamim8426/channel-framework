@@ -115,3 +115,22 @@ def test_approve_requires_awaiting_state(ws, channel):
     p = project_dir(ws, channel)
     assert main(["--root", str(ws.root), "approve", "--channel", channel, "--project", p.name]) == 0
     assert main(["--root", str(ws.root), "approve", "--channel", channel, "--project", p.name]) == 1  # already done
+
+
+def test_vertical_channel_builds_vertical_images_and_video(ws, channel, capsys):
+    f = ws.channel_dir(channel) / "channel.yaml"
+    d = yaml.safe_load(f.read_text())
+    d["visual_style"]["aspect"] = "9:16"
+    d["options"] = {"image_fit": "crop"}
+    f.write_text(yaml.safe_dump(d, allow_unicode=True))
+    assert main(["--root", str(ws.root), "start-script", "--channel", channel, "a vertical tip"]) == 0
+    p = project_dir(ws, channel)
+    from PIL import Image
+    assert Image.open(next((p / "images").iterdir())).size == (720, 1280)
+    assert Image.open(p / "build" / "title_card.png").size == (720, 1280)
+    video = p / "build" / "preview.mp4"
+    if FF.have_ffmpeg() and video.exists():
+        import subprocess
+        wh = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0",
+                             str(video)], capture_output=True, text=True).stdout.strip()
+        assert wh == "720,1280"

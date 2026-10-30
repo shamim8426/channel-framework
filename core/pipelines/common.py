@@ -68,6 +68,14 @@ def stage_review_script(ctx: Context):
 
 
 # ---- images ---------------------------------------------------------------------------------------------------------
+FRAME_SIZES = {"16:9": (1280, 720), "9:16": (720, 1280), "1:1": (1080, 1080)}
+
+
+def frame_size(cfg) -> tuple:
+    """Pixel size of images and video for visual_style.aspect (default 16:9)."""
+    return FRAME_SIZES[cfg["visual_style"].get("aspect", "16:9")]
+
+
 def image_prompt(cfg, scene: dict) -> str:
     chars = [c for c in cfg["characters"] if c["id"] in scene.get("characters", [])]
     parts = [cfg["visual_style"]["prompt"], scene["prompt"]] + [f"{c['name']}: {c['description']}" for c in chars]
@@ -76,6 +84,9 @@ def image_prompt(cfg, scene: dict) -> str:
         parts.append("Never depict: " + "; ".join(never) + ".")
     if cfg["visual_style"].get("negative_prompt"):
         parts.append("Avoid: " + cfg["visual_style"]["negative_prompt"])
+    aspect = cfg["visual_style"].get("aspect", "16:9")
+    if aspect != "16:9":
+        parts.append(f"Composition: {'vertical' if aspect == '9:16' else 'square'} {aspect} frame, subject centred.")
     return " ".join(parts)
 
 
@@ -92,7 +103,7 @@ def stage_images(ctx: Context):
         if bad:
             raise GateError(f"image prompt for scene {sc['id']} contains forbidden term(s): {bad}")
         ctx.costlog.check(ctx.project.name, getattr(ctx.providers["image"], "est_cost", 0.0))
-        res = ctx.providers["image"].generate(prompt, out)
+        res = ctx.providers["image"].generate(prompt, out, size=frame_size(ctx.cfg))
         ctx.charge("image", res, f"scene {sc['id']}")
         made += 1
     return {"note": f"{len(scenes)} scenes ({made} generated, rest cached)"}
@@ -133,9 +144,10 @@ def stage_tts(ctx: Context):
 # ---- build ----------------------------------------------------------------------------------------------------------
 def title_card(ctx: Context, title: str, path):
     from PIL import Image
-    base = Image.new("RGB", (1280, 720), (18, 24, 38))
-    sprite = text_pil.render(title, ctx.cfg["options"].get("title_font"), 56, maxw=1100, max_lines=3, box=(0, 0, 0, 0.35), radius=18)
-    base.paste(sprite, ((1280 - sprite.width) // 2, (720 - sprite.height) // 2), sprite)
+    w, h = frame_size(ctx.cfg)
+    base = Image.new("RGB", (w, h), (18, 24, 38))
+    sprite = text_pil.render(title, ctx.cfg["options"].get("title_font"), 56, maxw=w - 180, max_lines=3, box=(0, 0, 0, 0.35), radius=18)
+    base.paste(sprite, ((w - sprite.width) // 2, (h - sprite.height) // 2), sprite)
     base.save(path)
 
 
@@ -164,7 +176,8 @@ def stage_build(ctx: Context):
     if not FF.have_ffmpeg():
         return {"note": "ffmpeg missing: wrote preview_manifest.json only"}
     raw = ctx.project.path("build", "preview_raw.mp4")
-    FF.slideshow(images, durs, ctx.project.path("audio", "voice.wav"), raw)
+    FF.slideshow(images, durs, ctx.project.path("audio", "voice.wav"), raw, size=frame_size(ctx.cfg),
+                 fit=ctx.cfg["options"].get("image_fit", "pad"))
     out = ctx.project.path("build", "preview.mp4")
     FF.normalize(raw, out, ctx.cfg["audio"]["target_lufs"], ctx.cfg["audio"]["true_peak"])
     raw.unlink(missing_ok=True)
