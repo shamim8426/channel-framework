@@ -33,6 +33,25 @@ class Workspace:
     def channel_template(self) -> Path:
         return FRAMEWORK_ROOT / "channels" / "_template"
 
+    @property
+    def is_separate(self) -> bool:
+        """True when channels live outside the framework checkout (--root / CF_ROOT)."""
+        return self.root != FRAMEWORK_ROOT.resolve()
+
+    def cmd(self, rest: str) -> str:
+        """The command a user should type next; adds --root when the workspace is not the framework checkout."""
+        return f"python -m core --root {self.root} {rest}" if self.is_separate else f"python -m core {rest}"
+
+    @property
+    def global_rules_ref(self) -> str:
+        """How agents (working in the workspace root) find the global RULES.md: a path relative to the workspace."""
+        if not self.is_separate:
+            return "RULES.md"
+        try:
+            return Path(os.path.relpath(self.global_rules, self.root)).as_posix()
+        except ValueError:  # different drive on Windows
+            return self.global_rules.as_posix()
+
     # workspace data
     @property
     def channels(self) -> Path:

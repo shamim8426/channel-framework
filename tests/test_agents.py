@@ -2,6 +2,8 @@ import re
 
 import pytest
 
+from core.paths import Workspace
+
 from core.agents import ROLES, render_agents, render_template, context_for
 from core.config import load_channel
 from core.errors import FrameworkError
@@ -31,3 +33,19 @@ def test_real_sourced_blocks_only_for_real_sourced(ws):
 def test_unknown_variable_is_an_error():
     with pytest.raises(FrameworkError, match="unknown variable"):
         render_template("hello {{ channel.nope }}", {"channel": {"name": "x"}})
+
+
+def test_separate_workspace_points_agents_and_hints_at_framework(ws, channel):
+    from core.config import load_channel
+    from core.paths import FRAMEWORK_ROOT
+    assert ws.is_separate
+    ref = context_for(load_channel(channel, ws), ws)["rules"]["global"]
+    assert (ws.root / ref).resolve() == (FRAMEWORK_ROOT / "RULES.md").resolve()
+    assert ws.cmd("approve --channel x --project 001_y") == f"python -m core --root {ws.root} approve --channel x --project 001_y"
+
+
+def test_framework_checkout_workspace_keeps_short_paths():
+    from core.paths import FRAMEWORK_ROOT
+    fw = Workspace(FRAMEWORK_ROOT)
+    assert not fw.is_separate and fw.global_rules_ref == "RULES.md"
+    assert fw.cmd("doctor") == "python -m core doctor"

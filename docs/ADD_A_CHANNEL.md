@@ -69,3 +69,24 @@ resumes: finished stages are skipped, so a failure never costs you the stages al
 
 Put the agent/human research into `projects/<name>/research/dossier.json` (`facts` with at least `research.min_sources_per_fact` distinct sources each) or let
 the pipeline draft one. A thin dossier, an untagged claim, or (surah_explainer) original text that differs from `research/source_text.json` stops the run before upload.
+
+## Keep the channel in its own repo (recommended for real channels)
+
+Channels created inside this checkout are fine for trying things out, but a real channel's projects (scripts, dossiers, reviews) should not be
+committed to the framework. Put the channel in its own repo and point the framework at it with `--root` (or `CF_ROOT`):
+
+```
+some-folder/
+  channel-framework/   <- this repo (engine)
+  my-channel/          <- your channel repo: channels/my-channel/, secrets/, .claude/agents/
+```
+
+```bash
+cd channel-framework
+python -m core --root ../my-channel new-channel my-channel
+python -m core --root ../my-channel start-script --channel my-channel "first idea"
+```
+
+Every hint the framework prints (next command, approve line in `PREVIEW.md`) already includes `--root`, and the rendered agents point at
+this repo's `RULES.md` with a path relative to the channel repo. A small wrapper script in the channel repo (`cd <framework> && python -m
+core --root <channel repo> "$@"`) saves typing.

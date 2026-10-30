@@ -18,7 +18,7 @@ def readiness(cfg: ChannelConfig, ws: Workspace) -> list:
     out.append((all(n.get("voice_id") for n in cfg["narrators"]), "every narrator has a voice_id"))
     out.append((len(cfg["visual_style"]["prompt"]) >= 10, "visual style prompt set"))
     missing = [r for r in ROLES if not (ws.agents_out / f"{r}-{cfg.slug}.md").exists()]
-    out.append((not missing, "agents rendered into .claude/agents" if not missing else f"agents not rendered ({', '.join(missing)}): python -m core render-agents --channel {cfg.slug}"))
+    out.append((not missing, "agents rendered into .claude/agents" if not missing else f"agents not rendered ({', '.join(missing)}): " + ws.cmd(f"render-agents --channel {cfg.slug}")))
     return out
 
 

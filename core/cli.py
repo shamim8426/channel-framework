@@ -61,7 +61,7 @@ def cmd_start_script(ws, a) -> int:
         _report(project, ctx)
     if st["status"] == "awaiting_approval":
         print(f"\nAWAITING YOUR APPROVAL. Review {project.dir}/PREVIEW.md, then:\n"
-              f"    python -m core approve --channel {cfg.slug} --project {project.name}" + (" --live" if a.live else ""))
+              f"    " + ws.cmd(f"approve --channel {cfg.slug} --project {project.name}" + (" --live" if a.live else "")))
     return 0
 
 

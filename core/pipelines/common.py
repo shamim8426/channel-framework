@@ -197,7 +197,7 @@ def stage_preview(ctx: Context):  # approval stage has no fn; this writes the su
     md = [f"# PREVIEW for approval: {s['title']}", "", f"channel: {ctx.cfg.name} ({ctx.cfg.slug})", f"project: {ctx.project.name}", "",
           "Files:", "- script/script.md", "- build/preview.mp4 (or build/preview_manifest.json)", "- review/*.md", "",
           "Approve (uploads per channel config, privacy 'private' by default):",
-          f"    python -m core approve --channel {ctx.cfg.slug} --project {ctx.project.name}", ""]
+          f"    " + ctx.ws.cmd(f"approve --channel {ctx.cfg.slug} --project {ctx.project.name}"), ""]
     ctx.project.path("PREVIEW.md").write_text("\n".join(md), encoding="utf-8")
     return {"note": "PREVIEW.md written"}
 

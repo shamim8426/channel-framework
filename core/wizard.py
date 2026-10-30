@@ -96,7 +96,7 @@ def new_channel(ws: Workspace, args: dict, interactive: bool) -> int:
     for ok, msg in items:
         print(f"  [{'x' if ok else ' '}] {msg}")
     if is_ready(items):
-        print(f"READY FOR SCRIPT. Next: python -m core start-script --channel {slug} \"<topic or idea>\"")
+        print("READY FOR SCRIPT. Next: " + ws.cmd(f"start-script --channel {slug} \"<topic or idea>\""))
         if cfg.is_placeholder_channel_id:
             print("  note: youtube_channel_id is REPLACE_ME - fill it in before a live upload (dry runs work without it).")
         return 0
