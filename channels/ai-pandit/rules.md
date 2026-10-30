@@ -1,4 +1,4 @@
-# AI Jugaad - channel rules
+# AI Pandit - channel rules
 
 Appended AFTER the global `RULES.md`. A channel may add or tighten rules, never loosen a global one.
 

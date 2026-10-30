@@ -1,4 +1,4 @@
-# AI Jugaad - style learnings
+# AI Pandit - style learnings
 
 Keep this short and evidence-based: add a line only after analytics or a review shows it.
 

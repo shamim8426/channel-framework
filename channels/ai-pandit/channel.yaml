@@ -1,8 +1,8 @@
 # channel config (validated by `python -m core validate`). Secrets never go here.
-# AI Jugaad: vertical Hinglish shorts with practical Claude / Claude Code / MCP tips.
-slug: ai-jugaad
-name: AI Jugaad
-handle: '@aijugaad'              # informational; set to the real handle once the channel exists
+# AI Pandit: vertical Hinglish shorts with practical Claude / Claude Code / MCP tips.
+slug: ai-pandit
+name: AI Pandit
+handle: '@aipandit'              # informational; set to the real handle once the channel exists
 youtube_channel_id: REPLACE_ME   # UC... (24 chars). Live uploads stay blocked until this is filled in.
 language: hi-Latn                # Hinglish: Hindi written in Roman script, with English technical terms
 niche: 60-second Hinglish shorts teaching practical Claude / Claude Code / MCP technical tips
@@ -60,7 +60,7 @@ youtube:
   contains_synthetic_media: true
   privacy: private
   auto_publish: false
-  title_suffix: "| AI Jugaad #shorts"
+  title_suffix: "| AI Pandit #shorts"
   default_tags: [claude, claude code, mcp, ai tools, hinglish, ai in hindi, coding, shorts]
   playlists: {}
   schedule: {timezone: Asia/Kolkata, long_time: "19:00", immediate_after: "19:00", short_after_long_min: 60, one_long_per_day: true}
@@ -70,4 +70,4 @@ strings:
   ai_disclosure: "Visuals aur voice AI se banaye gaye hain. Facts official docs se verify kiye gaye hain."
   not_affiliated: "Yeh channel Anthropic se affiliated nahi hai."
 options: {}
-credentials_ref: ai-jugaad
+credentials_ref: ai-pandit
